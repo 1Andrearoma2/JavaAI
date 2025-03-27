@@ -1,7 +1,6 @@
 package org.example;
 
 import ai.onnxruntime.*;
-import org.apache.commons.lang3.ArrayUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
@@ -10,15 +9,20 @@ import java.util.*;
 
 public class GPT2Java {
     private static Map<Integer, String> vocab;  // Dizionario per la decodifica
+    private static String vocabPath;
+    private static String modelPath;
+
 
     public static void main(String[] args) throws Exception {
+        vocabPath = "C:\\Users\\Andrearoma\\Desktop\\ai\\models\\TinyLlama\\vocab.json";
+        modelPath = "C:\\Users\\Andrearoma\\Desktop\\ai\\models\\TinyLlama\\onnx\\decoder_model.onnx";
         // Carica il vocabolario da vocab.json
-        vocab = loadVocabulary("C:\\Users\\Andrearoma\\Desktop\\ai\\models\\TinyLlama\\vocab.json");
+        vocab = loadVocabulary(vocabPath);
 
         // Carica il modello ONNX
         OrtEnvironment env = OrtEnvironment.getEnvironment();
         OrtSession.SessionOptions options = new OrtSession.SessionOptions();
-        OrtSession session = env.createSession("C:\\Users\\Andrearoma\\Desktop\\ai\\models\\TinyLlama\\onnx\\decoder_model.onnx", options);
+        OrtSession session = env.createSession(modelPath, options);
 
         // Definisci il prompt iniziale
         String prompt = "What is machine learning?";
@@ -27,7 +31,7 @@ public class GPT2Java {
             inputTokens.add(token);
         }
 
-        int maxTokens = 20;  // Numero massimo di token da generare
+        int maxTokens = 50;  // Numero massimo di token da generare
         long eosToken = 50256;  // Token di fine sequenza
 
         for (int step = 0; step < maxTokens; step++) {
@@ -57,7 +61,7 @@ public class GPT2Java {
             // Aggiungi il token alla sequenza
             inputTokens.add((long) nextToken);
             String tokenToString = decodeToken(nextToken);
-            tokenToString = tokenToString.replace("Ġ", " ").replace("Ċ", " ");
+            tokenToString = tokenToString.replace("0x0A", " ").replace("Ċ", " ");
             System.out.println("Token generato: " + nextToken + " → " + tokenToString);
 
             // Interrompi se viene generato il token di fine sequenza
@@ -68,13 +72,13 @@ public class GPT2Java {
 
         // Decodifica la sequenza finale
         String generatedText = decodeTokens(inputTokens);
-        generatedText = generatedText.replace("Ġ", " ").replace("Ċ", " ");
+        generatedText = generatedText.replace("<0x0A>", " ").replace("Ċ", " ");
         System.out.println("\nTesto generato:\n" + generatedText);
     }
 
     // Funzione per tokenizzare il prompt (da sostituire con una vera tokenizzazione)
     private static long[] tokenizePrompt(String prompt) {
-        return new long[]{28851, 8988, 521, 685, 8155, 17607};  // "What is machine learning?"
+        return new long[]{22110, 13, 275, 13, 20841, 2049, 13, 14958, 2929, 2172, 29973};  // 29973 = ?
     }
 
     // Funzione per caricare il vocabolario da vocab.json
