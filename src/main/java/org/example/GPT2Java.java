@@ -23,7 +23,7 @@ public class GPT2Java {
             inputTokens.add(token);
         }
 
-        int maxTokens = 50;  // Questi sono usati per gestire la potenza del modello
+        int maxTokens = 20;  // Questi sono usati per gestire la potenza del modello
         long eosToken = 50256;
 
         for (int step = 0; step < maxTokens; step++) {

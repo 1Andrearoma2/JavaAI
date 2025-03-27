@@ -14,7 +14,7 @@ public class Methods {
 
     // Metodo per gestire il prompt
     public static long[] tokenizePrompt() {
-        return new long[]{22110, 13, 275, 13, 20841, 2049, 13, 14958, 2929, 2172, 29973};  // 29973 = ?
+        return new long[]{5618, 13, 275, 13, 8066, 13, 978, 29973};  // 29973 = ?
     }
 
     // Funzione per caricare il vocabolario dal vocab.json
