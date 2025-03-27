@@ -8,87 +8,83 @@ import java.io.IOException;
 import java.util.*;
 
 public class GPT2Java {
-    private static Map<Integer, String> vocab;  // Dizionario per la decodifica
-    private static String vocabPath;
-    private static String modelPath;
 
+    private static Map<Integer, String> vocab;
 
     public static void main(String[] args) throws Exception {
-        vocabPath = "C:\\Users\\Andrearoma\\Desktop\\ai\\models\\TinyLlama\\vocab.json";
-        modelPath = "C:\\Users\\Andrearoma\\Desktop\\ai\\models\\TinyLlama\\onnx\\decoder_model.onnx";
-        // Carica il vocabolario da vocab.json
+        String vocabPath = "C:\\Users\\Andrearoma\\Desktop\\ai\\models\\TinyLlama\\vocab.json";
+        String modelPath = "C:\\Users\\Andrearoma\\Desktop\\ai\\models\\TinyLlama\\onnx\\decoder_model.onnx"; // Qui si puó scegliere il modello
         vocab = loadVocabulary(vocabPath);
 
-        // Carica il modello ONNX
+        // Qui creiamo la sessione onnx con il modello scelto
         OrtEnvironment env = OrtEnvironment.getEnvironment();
         OrtSession.SessionOptions options = new OrtSession.SessionOptions();
         OrtSession session = env.createSession(modelPath, options);
 
-        // Definisci il prompt iniziale
-        String prompt = "What is machine learning?";
+        // Qui inizializiamo il prompt da dare al modello
         List<Long> inputTokens = new ArrayList<>();
-        for (long token : tokenizePrompt(prompt)) {
+        for (long token : tokenizePrompt()) {
             inputTokens.add(token);
         }
 
-        int maxTokens = 50;  // Numero massimo di token da generare
-        long eosToken = 50256;  // Token di fine sequenza
+        int maxTokens = 50;  // Questi sono usati per gestire la potenza del modello
+        long eosToken = 50256;
 
         for (int step = 0; step < maxTokens; step++) {
             long[] inputArray = inputTokens.stream().mapToLong(Long::longValue).toArray();
 
-            // Crea la attention_mask
+            // Creiamo l'attention_mask
             long[] attentionMaskArray = new long[inputArray.length];
             Arrays.fill(attentionMaskArray, 1);
 
-            // Crea i tensori ONNX per l'input
+            // Creiamo i tensori onnx per l'input
             OnnxTensor inputTensor = OnnxTensor.createTensor(env, new long[][]{inputArray});
             OnnxTensor attentionMaskTensor = OnnxTensor.createTensor(env, new long[][]{attentionMaskArray});
 
-            // Mappa di input per ONNX
+            // Mappa degli input per onnx
             Map<String, OnnxTensor> feeds = new HashMap<>();
             feeds.put("input_ids", inputTensor);
             feeds.put("attention_mask", attentionMaskTensor);
 
-            // Esegui l'inferenza
+            // Avviamo la sessione
             OrtSession.Result result = session.run(feeds);
             float[][][] outputData = (float[][][]) result.get(0).getValue();
 
-            // Ottieni il token più probabile
+            // Prendiamo il token piú probabile
             float[] logits = outputData[0][outputData[0].length - 1];
             int nextToken = argmax(applySoftmax(logits));
 
-            // Aggiungi il token alla sequenza
+            // Aggiungiamo il token alla sequenza
             inputTokens.add((long) nextToken);
             String tokenToString = decodeToken(nextToken);
             tokenToString = tokenToString.replace("0x0A", " ").replace("Ċ", " ");
             System.out.println("Token generato: " + nextToken + " → " + tokenToString);
 
-            // Interrompi se viene generato il token di fine sequenza
+            // Interrompiamo se il token é uguale al eosToken
             if (nextToken == eosToken) {
                 break;
             }
         }
 
-        // Decodifica la sequenza finale
+        // Decodifiamo la sequenza finale
         String generatedText = decodeTokens(inputTokens);
         generatedText = generatedText.replace("<0x0A>", " ").replace("Ċ", " ");
         System.out.println("\nTesto generato:\n" + generatedText);
     }
 
-    // Funzione per tokenizzare il prompt (da sostituire con una vera tokenizzazione)
-    private static long[] tokenizePrompt(String prompt) {
+    // Metodo per gestire il prompt
+    private static long[] tokenizePrompt() {
         return new long[]{22110, 13, 275, 13, 20841, 2049, 13, 14958, 2929, 2172, 29973};  // 29973 = ?
     }
 
-    // Funzione per caricare il vocabolario da vocab.json
+    // Funzione per caricare il vocabolario dal vocab.json
     private static Map<Integer, String> loadVocabulary(String filePath) {
         Map<Integer, String> vocabMap = new HashMap<>();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Integer> rawVocab = objectMapper.readValue(new File(filePath), Map.class);
 
-            // Convertire la mappa da <String, Integer> a <Integer, String>
+            // Visto che il file .json é String-Int e a noi serve Int-String, invertiamo la mappa
             for (Map.Entry<String, Integer> entry : rawVocab.entrySet()) {
                 vocabMap.put(entry.getValue(), entry.getKey());
             }
@@ -115,6 +111,8 @@ public class GPT2Java {
     }
 
     // Funzione per applicare softmax
+    // Il softmax serve per convertire i logits in probabilita, cioe trasforma
+    // numeri grezzi in numeri piu facili da usare
     private static float[] applySoftmax(float[] logits) {
         float maxLogit = Float.NEGATIVE_INFINITY;
         for (float logit : logits) {
@@ -133,7 +131,7 @@ public class GPT2Java {
         return logits;
     }
 
-    // Funzione per trovare l'indice del massimo
+    // Funzione per trovare l'indice massimo di un array
     private static int argmax(float[] array) {
         int index = 0;
         for (int i = 1; i < array.length; i++) {
