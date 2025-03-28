@@ -12,18 +12,12 @@ import static org.example.GPT2Java.vocab;
 
 public class Methods {
 
-    // Metodo per gestire il prompt
-    public static long[] tokenizePrompt() {
-        return new long[]{5618, 13, 275, 13, 8066, 13, 978, 29973};  // 29973 = ?
-    }
-
     // Funzione per caricare il vocabolario dal vocab.json
     public static Map<Integer, String> loadVocabulary(String filePath) {
         Map<Integer, String> vocabMap = new HashMap<>();
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Integer> rawVocab = objectMapper.readValue(new File(filePath), Map.class);
-
             // Visto che il file .json é String-Int e a noi serve Int-String, invertiamo la mappa
             for (Map.Entry<String, Integer> entry : rawVocab.entrySet()) {
                 vocabMap.put(entry.getValue(), entry.getKey());
