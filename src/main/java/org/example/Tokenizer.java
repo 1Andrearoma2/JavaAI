@@ -1,14 +1,20 @@
 package org.example;
 
 import java.util.*;
+import static org.example.GPT2Java.vocab;
 
 public class Tokenizer {
-    public static long[] tokenize(String prompt, Map<Integer, String> vocab) {
+    /**
+     * Metodo usato per trasformare il prompt in comprensibile per il modello traducendolo in tokens
+     * @param prompt String da trasformare in tokens
+     * @return Il prompt tradotto in tokens sotto forma di array di long
+     */
+    public static long[] tokenize(String prompt) {
         List<Integer> tokenList = new ArrayList<>();
         String[] words = prompt.split(" ");
 
         for (String word : words) {
-            processWord(word, vocab, tokenList);
+            processWord(word, tokenList);
             tokenList.add(13); // Aggiunge il separatore tra parole
         }
 
@@ -20,8 +26,14 @@ public class Tokenizer {
         return tokenList.stream().mapToLong(Integer::longValue).toArray();
     }
 
-    private static void processWord(String word, Map<Integer, String> vocab, List<Integer> tokenList) {
-        Integer token = findInVocab(word, vocab);
+    /**
+     * Metodo che traduce parola per parola. Se essa non viene trovata viene divisa a meta'
+     * o al massimo carattere per carattere
+     * @param word
+     * @param tokenList
+     */
+    private static void processWord(String word, List<Integer> tokenList) {
+        Integer token = findInVocab(word);
         if (token != null) {
             tokenList.add(token);
             return;
@@ -32,8 +44,8 @@ public class Tokenizer {
         String part1 = word.substring(0, mid);
         String part2 = word.substring(mid);
 
-        Integer token1 = findInVocab(part1, vocab);
-        Integer token2 = findInVocab(part2, vocab);
+        Integer token1 = findInVocab(part1);
+        Integer token2 = findInVocab(part2);
 
         if (token1 != null && token2 != null) {
             tokenList.add(token1);
@@ -41,16 +53,21 @@ public class Tokenizer {
             return;
         }
 
-        // Divisione in lettere
+        // Divisione carattere per carattere
         for (char c : word.toCharArray()) {
-            Integer charToken = findInVocab(String.valueOf(c), vocab);
+            Integer charToken = findInVocab(String.valueOf(c));
             if (charToken != null) {
                 tokenList.add(charToken);
             }
         }
     }
 
-    private static Integer findInVocab(String word, Map<Integer, String> vocab) {
+    /**
+     * Metodo usato per cercare la parola all'interno della mappa
+     * @param word da ricercare nella mappa
+     * @return Il token dell'input se viene trovato nella mappa, altrimenti null
+     */
+    private static Integer findInVocab(String word) {
         for (Map.Entry<Integer, String> entry : vocab.entrySet()) {
             if (entry.getValue().equals(word)) {
                 return entry.getKey();

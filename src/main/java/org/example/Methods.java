@@ -12,7 +12,11 @@ import static org.example.GPT2Java.vocab;
 
 public class Methods {
 
-    // Funzione per caricare il vocabolario dal vocab.json
+    /**
+     * Metodo usato per caricare il vocabolario all'inizio del programma
+     * @param filePath file vocab.json in cui sono scritte tutte le corrispondenze
+     * @return una mappa che contiene tutte le corrispondenze presenti nel file vocab.json
+     */
     public static Map<Integer, String> loadVocabulary(String filePath) {
         Map<Integer, String> vocabMap = new HashMap<>();
         try {
@@ -30,12 +34,21 @@ public class Methods {
         return vocabMap;
     }
 
-    // Funzione per decodificare un token
+    /**
+     * Decodifica il token in stringa cercandolo nella mappa, se non viene trovato
+     * ritorna un valore sconosciuto
+     * @param tokenId token da decodificare
+     * @return la stringa che corrisponde al token
+     */
     public static String decodeToken(int tokenId) {
         return vocab.getOrDefault(tokenId, "<UNK>");
     }
 
-    // Funzione per decodificare tutta la sequenza
+    /**
+     * Decodifica una lista di token cercandoli nella mappa attraverso il metodo decodeToken
+     * @param tokens lista contenente i token da decodificare
+     * @return La stringa intera
+     */
     public static String decodeTokens(List<Long> tokens) {
         StringBuilder sb = new StringBuilder();
         for (long token : tokens) {
@@ -44,9 +57,12 @@ public class Methods {
         return sb.toString();
     }
 
-    // Funzione per applicare softmax
-    // Il softmax serve per convertire i logits in probabilita, cioe trasforma
-    // numeri grezzi in numeri piu facili da usare
+    /**
+     * Funzione per applicare il softmax ad un array di logits
+     * e farli diventare delle probabilita'
+     * @param logits array in cui applicare il softmax
+     * @return L'array convertito in probabilita'
+     */
     public static float[] applySoftmax(float[] logits) {
         float maxLogit = Float.NEGATIVE_INFINITY;
         for (float logit : logits) {
@@ -65,7 +81,11 @@ public class Methods {
         return logits;
     }
 
-    // Funzione per trovare l'indice massimo di un array
+    /**
+     * Metodo per trovare l'indice massimo in un array
+     * @param array da elaborare
+     * @return L'indice massimo
+     */
     public static int argmax(float[] array) {
         int index = 0;
         for (int i = 1; i < array.length; i++) {
