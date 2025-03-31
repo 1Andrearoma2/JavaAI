@@ -6,7 +6,7 @@ import org.example.Tokenizer;
 import java.util.*;
 import static org.example.Methods.*;
 
-public class GPT2JavaScanner {
+public class GPT2Java {
     public static Map<Integer, String> vocab;
 
     public static void main(String[] args) throws Exception {

@@ -1,7 +1,7 @@
 package org.example;
 
 import java.util.*;
-import static org.ScannerExample.GPT2JavaScanner.vocab;
+import static org.ScannerExample.GPT2Java.vocab;
 
 public class Tokenizer {
     /**

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.ScannerExample.GPT2JavaScanner.vocab;
+import static org.ScannerExample.GPT2Java.vocab;
 
 public class Methods {
 
