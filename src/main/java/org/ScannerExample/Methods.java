@@ -1,4 +1,4 @@
-package org.example;
+package org.ScannerExample;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.ScannerExample.GPT2JavaScanner.vocab;
+import static org.example.GPT2Java.vocab;
 
 public class Methods {
 
@@ -26,6 +26,8 @@ public class Methods {
             for (Map.Entry<String, Integer> entry : rawVocab.entrySet()) {
                 vocabMap.put(entry.getValue(), entry.getKey());
             }
+
+            System.out.println("Vocabolario caricato con " + vocabMap.size() + " parole.");
         } catch (IOException e) {
             e.printStackTrace();
         }
